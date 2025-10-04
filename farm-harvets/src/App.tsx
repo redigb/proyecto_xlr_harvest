@@ -1,12 +1,11 @@
-import './App.css'
-import ViewMap from './comoponents/Maps'
+import ProyectAppp from "./app/index"
+
 function App() {
 
   return (
-    <>
-    <ViewMap></ViewMap>
-    </>
-  )
+    <div>
+      <ProyectAppp />
+    </div>)
 }
 
 export default App
