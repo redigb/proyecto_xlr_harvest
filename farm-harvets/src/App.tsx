@@ -1,10 +1,14 @@
 import './App.css'
-import ViewMap from './comoponents/Maps'
+import 'leaflet/dist/leaflet.css';
+// import ViewMap from './comoponents/Maps'
+import MapaFullScreen from './comoponents/Maps';
 function App() {
 
   return (
     <>
-    <ViewMap></ViewMap>
+    {/* <ViewMap></ViewMap> */}
+    <MapaFullScreen></MapaFullScreen>
+    Mapcli
     </>
   )
 }

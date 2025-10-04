@@ -1,9 +1,9 @@
-#root {
+/* #root {
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
-}
+} */
 html, body, #root {
   height: 100%;
   margin: 0;
@@ -11,7 +11,7 @@ html, body, #root {
 }
 
 
-.logo {
+/* .logo {
   height: 6em;
   padding: 1.5em;
   will-change: filter;
@@ -45,4 +45,4 @@ html, body, #root {
 
 .read-the-docs {
   color: #888;
-}
+} */
