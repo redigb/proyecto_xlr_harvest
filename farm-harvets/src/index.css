@@ -1,0 +1,309 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;500;600;700&display=swap');
+
+
+
+/*#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+ ============================================== */
+/* 🎮 BASE STYLES - XLR HARVEST PREMIUM */
+/* ============================================== */
+
+@layer base {
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    html {
+        background: #050810;
+        color: white;
+        font-family: 'Rajdhani', sans-serif;
+    }
+
+    body {
+        background: #050810;
+        min-height: 100vh;
+    }
+
+    /* Scrollbar personalizado */
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #0a0e1a;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #2E7D32;
+        border-radius: 4px;
+    }
+}
+
+/* ============================================== */
+/* 🎪 COMPONENTES GAMER PREMIUM */
+/* ============================================== */
+
+@layer components {
+
+    /* === BOTONES ESTILO CLASH ROYALE === */
+    .btn-game {
+        @apply font-display text-white bg-gradient-primary rounded-game-lg shadow-button px-6 py-3 text-lg uppercase tracking-wider transition-all duration-300 ease-out cursor-pointer border-2 border-white/20 hover:shadow-button-hover hover:scale-105 active:scale-95;
+    }
+
+    .btn-sun {
+        @apply bg-gradient-sun text-gray-900 font-bold border-amber-200/30;
+    }
+
+    .btn-premium {
+        @apply bg-gradient-gold text-gray-900 font-bold border-yellow-200/30;
+    }
+
+    /* === TARJETAS Y CONTENEDORES === */
+    .card-game {
+        @apply bg-gradient-card rounded-game-lg shadow-card border border-gray-700 transition-all duration-300 hover:shadow-game-lg hover:scale-[1.02];
+    }
+
+    /* === MENÚS Y NAVEGACIÓN === */
+    .menu-item {
+        @apply font-display text-white px-4 py-2 rounded-game transition-all duration-300 bg-card/80 hover:bg-primary/20 hover:scale-105 cursor-pointer;
+    }
+
+    /* === INPUTS Y CONTROLES === */
+    .input-game {
+        @apply bg-card border-2 border-primary/30 rounded-game px-4 py-2 text-white placeholder-muted focus:outline-none focus:border-primary transition-all;
+    }
+}
+
+/* ============================================== */
+/* 🎬 UTILIDADES AVANZADAS */
+/* ============================================== */
+@layer utilities {
+    .text-gradient-primary {
+        background: linear-gradient(135deg, #2E7D32, #66BB6A);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .text-gradient-sun {
+        background: linear-gradient(45deg, #F9A825, #FFD54F);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+}
+
+/* ============================================== */
+/* RESPONSIVE */
+/* ============================================== */
+
+@media (max-width: 768px) {
+    .btn-game {
+        @apply px-4 py-2 text-base;
+    }
+}
+
+
+
+@import "tailwindcss";
+
+/* Fuentes (opcional) */
+@import url("https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Orbitron:wght@400;600&family=Rajdhani:wght@400;600;700&display=swap");
+
+/* 🎨 Tokens de diseño con @theme */
+@theme {
+    /* Colores principales */
+    --color-primary: #2E7D32;
+    --color-primary-50: #E8F5E9;
+    --color-primary-100: #C8E6C9;
+    --color-primary-200: #A5D6A7;
+    --color-primary-300: #81C784;
+    --color-primary-400: #66BB6A;
+    --color-primary-500: #4CAF50;
+    --color-primary-600: #43A047;
+    --color-primary-700: #388E3C;
+    --color-primary-800: #2E7D32;
+    --color-primary-900: #1B5E20;
+
+    /* Acentos: sol */
+    --color-accent-sun: #F9A825;
+    --color-accent-sun-50: #FFFDE7;
+    --color-accent-sun-100: #FFF9C4;
+    --color-accent-sun-200: #FFF59D;
+    --color-accent-sun-300: #FFF176;
+    --color-accent-sun-400: #FFEE58;
+    --color-accent-sun-500: #FFEB3B;
+    --color-accent-sun-600: #FDD835;
+    --color-accent-sun-700: #FBC02D;
+    --color-accent-sun-800: #F9A825;
+    --color-accent-sun-900: #F57F17;
+
+    /* Acentos: tierra */
+    --color-accent-soil: #C59B6D;
+    --color-accent-soil-50: #FAF5F0;
+    --color-accent-soil-100: #F4EADE;
+    --color-accent-soil-200: #E8D5BD;
+    --color-accent-soil-300: #DDC09C;
+    --color-accent-soil-400: #D1AB7B;
+    --color-accent-soil-500: #C59B6D;
+    --color-accent-soil-600: #B8864D;
+
+    /* Acentos: oro */
+    --color-accent-gold: #FFD700;
+    --color-accent-gold-light: #FFE44D;
+    --color-accent-gold-dark: #E6C300;
+
+    /* Fondos */
+    --color-darker: #050810;
+    --color-dark: #0a0e1a;
+    --color-card: #141824;
+    --color-card-hover: #1a2030;
+    --color-muted: #6b7a8f;
+
+    /* Fuentes */
+    --font-display: "Luckiest Guy", cursive;
+    --font-sans: "Rajdhani", system-ui, sans-serif;
+    --font-mono: "Orbitron", monospace;
+
+    /* Radios */
+    --radius-game-sm: 8px;
+    --radius-game: 12px;
+    --radius-game-md: 16px;
+    --radius-game-lg: 20px;
+    --radius-game-xl: 24px;
+
+    /* Sombras */
+    --shadow-game: 0 4px 16px rgba(46, 125, 50, 0.2);
+    --shadow-game-lg: 0 8px 32px rgba(46, 125, 50, 0.3);
+    --shadow-button: 0 4px 12px rgba(46, 125, 50, 0.3);
+    --shadow-button-hover: 0 6px 20px rgba(46, 125, 50, 0.4);
+    --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.3);
+    --shadow-glow: 0 0 20px rgba(0, 255, 136, 0.4);
+}
+
+/* 🌈 Gradientes como utilidades */
+@utility bg-gradient-primary {
+    background-image: linear-gradient(135deg, #2E7D32 0%, #4CAF50 50%, #66BB6A 100%);
+}
+
+@utility bg-gradient-sun {
+    background-image: linear-gradient(45deg, #F9A825 0%, #FFD54F 50%, #FFECB3 100%);
+}
+
+@utility bg-gradient-gold {
+    background-image: linear-gradient(45deg, #FFD700 0%, #FFE44D 50%, #FFF176 100%);
+}
+
+@utility bg-gradient-card {
+    background-image: linear-gradient(145deg, #141824 0%, #1a2030 100%);
+}
+
+/* 🎬 Animaciones */
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0)
+    }
+
+    50% {
+        transform: translateY(-10px)
+    }
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0
+    }
+
+    to {
+        opacity: 1
+    }
+}
+
+@keyframes slide-in-up {
+    from {
+        transform: translateY(30px);
+        opacity: 0
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1
+    }
+}
+
+@keyframes slide-in-left {
+    from {
+        transform: translateX(-30px);
+        opacity: 0
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1
+    }
+}
+
+/* Utilidades de animación */
+@utility animate-float {
+    animation: float 3s ease-in-out infinite;
+}
+
+@utility animate-fade-in {
+    animation: fade-in .5s ease-out;
+}
+
+@utility animate-slide-in-up {
+    animation: slide-in-up .5s ease-out;
+}
+
+@utility animate-slide-in-left {
+    animation: slide-in-left .5s ease-out;
+}
+
+/* Si quieres un pulso lento compatible con la animación por defecto */
+@utility animate-pulse-slow {
+    animation: pulse 3s ease-in-out infinite;
+}
