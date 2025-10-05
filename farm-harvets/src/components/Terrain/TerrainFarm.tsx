@@ -1,8 +1,6 @@
 import * as THREE from 'three'
 import { useMemo, useRef, useEffect } from 'react'
-import { useFrame } from '@react-three/fiber'
 
-// -------- 🌱 CULTIVOS GENERALES -------- //
 type V3 = [number, number, number]
 
 function random(seed: number) {
@@ -10,7 +8,7 @@ function random(seed: number) {
   return x - Math.floor(x)
 }
 
-// 🔸 Base de campo genérico
+
 function CropPlot({
   pos = [0, 0.01, 0],
   size = 8,
