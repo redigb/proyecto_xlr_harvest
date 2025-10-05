@@ -1,5 +1,6 @@
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 
+
 function MapaFullScreen() {
   return (
     <div style={{ height: '100vh', width: '100vw' }}>
