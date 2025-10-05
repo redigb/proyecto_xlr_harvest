@@ -1,8 +1,4 @@
-// ==============================================
-// CREDITS SCREEN - Pantalla de Créditos
-// ==============================================
 
-import React from 'react';
 import BackButton from '../ui/BackButton';
 
 interface CreditsScreenProps {

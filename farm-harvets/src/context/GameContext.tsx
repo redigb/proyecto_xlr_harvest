@@ -1,18 +1,15 @@
-    // ==============================================
-    // GAME CONTEXT - Estado Global del Juego
-    // ==============================================
+import { createContext, useContext, useState, useCallback } from 'react';
+import type { ReactNode } from 'react'; 
 
-    import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
-
-    interface GameState {
+interface GameState {
     isPlaying: boolean;
     isPaused: boolean;
     currentLevel: number;
     score: number;
     playerName: string;
-    }
+}
 
-    interface GameContextType {
+interface GameContextType {
     gameState: GameState;
     startGame: () => void;
     pauseGame: () => void;
@@ -20,28 +17,28 @@
     quitGame: () => void;
     setPlayerName: (name: string) => void;
     updateScore: (points: number) => void;
-    }
+}
 
-    const defaultGameState: GameState = {
+const defaultGameState: GameState = {
     isPlaying: false,
     isPaused: false,
     currentLevel: 1,
     score: 0,
     playerName: 'Player',
-    };
+};
 
-    const GameContext = createContext<GameContextType | undefined>(undefined);
+const GameContext = createContext<GameContextType | undefined>(undefined);
 
-    export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [gameState, setGameState] = useState<GameState>(defaultGameState);
 
     const startGame = useCallback(() => {
         setGameState(prev => ({
-        ...prev,
-        isPlaying: true,
-        isPaused: false,
-        currentLevel: 1,
-        score: 0,
+            ...prev,
+            isPlaying: true,
+            isPaused: false,
+            currentLevel: 1,
+            score: 0,
         }));
     }, []);
 
@@ -76,14 +73,14 @@
     };
 
     return <GameContext.Provider value={value}>{children}</GameContext.Provider>;
-    };
+};
 
-    export const useGame = (): GameContextType => {
+export const useGame = (): GameContextType => {
     const context = useContext(GameContext);
     if (!context) {
         throw new Error('useGame must be used within a GameProvider');
     }
     return context;
-    };
+};
 
-    export default GameContext;
+export default GameContext;

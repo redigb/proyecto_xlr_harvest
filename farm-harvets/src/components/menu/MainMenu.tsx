@@ -1,11 +1,7 @@
-// ==============================================
-// MAIN MENU - Menú Principal del Juego - ESTILO CLASH ROYALE
-// ==============================================
-
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useAudio } from '../../context/AudioContext';
 import MenuItem from './MenuItem';
-import { Screen } from '../../App';
+import type { Screen } from '../../App';
 
 interface MainMenuProps {
   onNavigate: (screen: Screen) => void;
@@ -19,23 +15,23 @@ const MainMenu: React.FC<MainMenuProps> = ({ onNavigate }) => {
   const menuItems = [
     {
       id: 'start',
-      label: 'EMPEZAR PARTIDA',
+      label: 'START GAME',
       icon: '⚔️',
-      description: 'Comenzar una nueva aventura',
+      description: 'Begin a new adventure',
       screen: 'start' as Screen,
     },
     {
       id: 'settings',
-      label: 'CONFIGURACIÓN',
+      label: 'SETTINGS',
       icon: '🎛️',
-      description: 'Ajustar audio y controles',
+      description: 'Adjust audio and controls',
       screen: 'settings' as Screen,
     },
     {
       id: 'credits',
-      label: 'CRÉDITOS',
+      label: 'CREDITS',
       icon: '👑',
-      description: 'Conoce al equipo creador',
+      description: 'Meet the development team',
       screen: 'credits' as Screen,
     },
   ];
@@ -88,26 +84,26 @@ const MainMenu: React.FC<MainMenuProps> = ({ onNavigate }) => {
 
   return (
     <div className={`flex flex-col items-center justify-center min-h-screen w-full px-4 transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
-      
+
       {/* 🏰 LOGO Y TÍTULO PRINCIPAL */}
       <div className="mb-16 text-center animate-fade-in">
         <div className="relative inline-block">
           {/* Efecto de brillo detrás del título */}
           <div className="absolute -inset-4 bg-gradient-to-r from-primary-400/20 to-accent-sun-400/20 blur-xl rounded-full opacity-60 animate-pulse-slow" />
-          
-          <h1 className="relative font-display text-6xl md:text-7xl text-white tracking-wider text-shadow-game-lg mb-4">
-            FARM BEST
+
+          <h1 className="relative font-display text-4xl md:text-5xl text-white tracking-wider text-shadow-game-lg mb-4">
+            FARM HARVEST
           </h1>
-          
+
           {/* Línea decorativa */}
           <div className="flex items-center justify-center gap-4 mt-6">
             <div className="w-12 h-1 bg-gradient-to-r from-transparent to-primary-400 rounded-full" />
             <div className="w-3 h-3 bg-accent-sun-400 rounded-full animate-pulse" />
             <div className="w-12 h-1 bg-gradient-to-l from-transparent to-accent-sun-400 rounded-full" />
           </div>
-          
+
           <p className="text-xl md:text-2xl text-accent-sun-300 font-game tracking-widest mt-6 text-shadow-game">
-            ELIGE TU DESTINO
+            Get ready to harvest!
           </p>
         </div>
       </div>
@@ -115,13 +111,12 @@ const MainMenu: React.FC<MainMenuProps> = ({ onNavigate }) => {
       {/* 🎯 MENÚ DE OPCIONES */}
       <div className="w-full max-w-2xl space-y-6 mb-20">
         {menuItems.map((item, index) => (
-          <div 
+          <div
             key={item.id}
-            className={`transition-all duration-500 transform ${
-              isVisible 
-                ? 'opacity-100 translate-y-0' 
+            className={`transition-all duration-500 transform ${isVisible
+                ? 'opacity-100 translate-y-0'
                 : 'opacity-0 translate-y-8'
-            }`}
+              }`}
             style={{ transitionDelay: `${index * 100 + 300}ms` }}
           >
             <MenuItem
@@ -137,32 +132,6 @@ const MainMenu: React.FC<MainMenuProps> = ({ onNavigate }) => {
         ))}
       </div>
 
-      {/* 🎮 INDICADOR DE CONTROLES */}
-      <div 
-        className={`text-center transition-all duration-500 delay-1000 ${
-          isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-        }`}
-      >
-        <div className="bg-white/5 backdrop-blur-lg rounded-game-lg px-6 py-4 border border-white/10 shadow-game">
-          <p className="text-white/80 font-game text-sm mb-2">
-            CONTROLES DEL MENÚ
-          </p>
-          <div className="flex items-center justify-center gap-6 text-xs">
-            <div className="flex items-center gap-2">
-              <div className="bg-white/10 px-2 py-1 rounded-game border border-white/20">
-                ↑↓
-              </div>
-              <span className="text-white/70">NAVEGAR</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="bg-white/10 px-2 py-1 rounded-game border border-white/20">
-                ENTER
-              </div>
-              <span className="text-white/70">SELECCIONAR</span>
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* 🌟 DECORACIONES ADICIONALES */}
 
@@ -175,13 +144,6 @@ const MainMenu: React.FC<MainMenuProps> = ({ onNavigate }) => {
       {/* Esquina decorativa derecha */}
       <div className="absolute top-8 right-8 opacity-40">
         <div className="w-6 h-6 border-t-2 border-r-2 border-accent-sun-400 rounded-tr-lg" />
-      </div>
-
-      {/* Versión */}
-      <div className="absolute bottom-6 right-6 bg-white/5 backdrop-blur-sm rounded-game px-3 py-2 border border-white/10">
-        <p className="text-white/60 font-mono text-xs">
-          v1.0.0 • CLASH ROYALE STYLE
-        </p>
       </div>
 
       {/* Indicador de selección actual */}
