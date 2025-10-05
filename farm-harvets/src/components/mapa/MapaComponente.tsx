@@ -1,42 +1,60 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+"use client"
+
+import type React from "react"
+import { useState, useEffect, useRef } from "react"
+import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet"
+import L from "leaflet"
+import "leaflet/dist/leaflet.css"
 
 // Types
 interface Resource {
-  name: string;
-  amount: number;
-  icon: string;
-  color: string;
-  layerKey?: 'truecolor' | 'ndvi' | 'thermal' | 'fire' | 'night';
+  name: string
+  amount: number
+  icon: string
+  color: string
+  layerKey?: "truecolor" | "ndvi" | "thermal" | "night"
 }
 
 interface FarmPlot {
-  id: string;
-  position: { lat: number; lng: number };
-  cultivated: boolean;
-  cropType?: string;
-  growth?: number;
+  id: string
+  position: { lat: number; lng: number }
+  cultivated: boolean
+  cropType?: string
+  growth?: number
 }
 
 interface GameStats {
-  playTime: number;
-  plotsCreated: number;
-  cropsHarvested: number;
-  resourcesGathered: number;
+  playTime: number
+  plotsCreated: number
+  cropsHarvested: number
+  resourcesGathered: number
+}
+
+interface UserLocation {
+  lat: number
+  lng: number
 }
 
 // Farm plot SVG with breathing effect
 const farmPlotSvg: string = `<svg viewBox="0 0 64 64" fill="none" width="48" height="48">
   <rect x="8" y="8" width="48" height="48" rx="8" fill="#8b4513"/>
   <rect x="12" y="12" width="40" height="40" rx="4" fill="#d2691e"/>
-  <path d="M16 24H48M16 40H48M24 16V56M40 16V56" stroke="#654321" stroke-width="1" opacity="0.3"/>
+  <path d="M16 24H48M16 40H48M24 16V56M40 16V56" stroke="#654321" strokeWidth="1" opacity="0.3"/>
   <circle cx="20" cy="20" r="1.5" fill="#228b22"/>
   <circle cx="44" cy="28" r="1.5" fill="#228b22"/>
   <circle cx="32" cy="36" r="1.5" fill="#228b22"/>
   <circle cx="28" cy="48" r="1.5" fill="#228b22"/>
-</svg>`;
+</svg>`
+
+const getCurrentLocationIcon = (): L.Icon => {
+  return L.icon({
+    iconUrl: "/campo.jpg",
+    iconSize: [40, 40],
+    iconAnchor: [20, 40],
+    popupAnchor: [0, -40],
+    className: "current-location-marker",
+  })
+}
 
 // Get plot marker icon with breathing effect
 const getPlotIcon = (isSelected?: boolean): L.DivIcon => {
@@ -66,10 +84,10 @@ const getPlotIcon = (isSelected?: boolean): L.DivIcon => {
       opacity: 0.5;
       pointer-events: none;
     "></div>
-  `;
+  `
 
-  const iconSize: L.PointExpression = [48, 48];
-  const anchor: L.PointExpression = [24, 48];
+  const iconSize: L.PointExpression = [48, 48]
+  const anchor: L.PointExpression = [24, 48]
 
   return L.divIcon({
     html: `
@@ -78,36 +96,36 @@ const getPlotIcon = (isSelected?: boolean): L.DivIcon => {
         ${farmPlotSvg}
       </div>
     `,
-    className: 'custom-div-icon',
+    className: "custom-div-icon",
     iconSize,
-    iconAnchor: anchor
-  }) as L.DivIcon;
-};
+    iconAnchor: anchor,
+  }) as L.DivIcon
+}
 
 // Map click handler component
 const GameMapClickHandler: React.FC<{
-  onMapClick: (position: [number, number]) => void;
-  isPlacingMode: boolean;
+  onMapClick: (position: [number, number]) => void
+  isPlacingMode: boolean
 }> = ({ onMapClick, isPlacingMode }) => {
   useMapEvents({
     click: (e) => {
       if (isPlacingMode) {
-        onMapClick([e.latlng.lat, e.latlng.lng]);
+        onMapClick([e.latlng.lat, e.latlng.lng])
       }
-    }
-  });
-  return null;
-};
+    },
+  })
+  return null
+}
 
 // Plot Management Modal
 const PlotModal: React.FC<{
-  isOpen: boolean;
-  onClose: () => void;
-  onAccess: () => void;
-  onDelete: () => void;
-  plot: FarmPlot | null;
+  isOpen: boolean
+  onClose: () => void
+  onAccess: () => void
+  onDelete: () => void
+  plot: FarmPlot | null
 }> = ({ isOpen, onClose, onAccess, onDelete, plot }) => {
-  if (!isOpen || !plot) return null;
+  if (!isOpen || !plot) return null
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -151,152 +169,148 @@ const PlotModal: React.FC<{
         </div>
       </div>
     </div>
-  );
-};
-
-interface MapaComponentProps {
-  onMode3d: () => void;
+  )
 }
 
+interface MapaComponentProps {
+  onMode3d: () => void
+}
 
 const MapaComponente: React.FC<MapaComponentProps> = ({ onMode3d }) => {
-
   const [resources, setResources] = useState<Resource[]>([
-    { name: 'COLOR REAL', amount: 50, icon: '🌍', color: 'bg-blue-500', layerKey: 'truecolor' },
-    { name: 'VEGETACION', amount: 100, icon: '🌱', color: 'bg-green-500', layerKey: 'ndvi' },
-    { name: 'TEMPERATURA', amount: 100, icon: '🌡️', color: 'bg-red-500', layerKey: 'thermal' },
-    { name: 'INCENDIOS', amount: 30, icon: '🔥', color: 'bg-orange-500', layerKey: 'fire' },
-    { name: 'VISTA NOCTURNA', amount: 20, icon: '🌙', color: 'bg-indigo-500', layerKey: 'night' },
-  ]);
+    { name: "COLOR REAL", amount: 50, icon: "🌍", color: "bg-blue-500", layerKey: "truecolor" },
+    { name: "VEGETACION", amount: 100, icon: "🌱", color: "bg-green-500", layerKey: "ndvi" },
+    { name: "TEMPERATURA", amount: 100, icon: "🌡️", color: "bg-red-500", layerKey: "thermal" },
+    { name: "VISTA NOCTURNA", amount: 20, icon: "🌙", color: "bg-indigo-500", layerKey: "night" },
+  ])
 
-  const [farmPlot, setFarmPlot] = useState<FarmPlot | null>(null);
-  const [isPlacingMode, setIsPlacingMode] = useState(false);
-  const [selectedPlot, setSelectedPlot] = useState<FarmPlot | null>(null);
-  const [showPlotModal, setShowPlotModal] = useState(false);
+  const [farmPlot, setFarmPlot] = useState<FarmPlot | null>(null)
+  const [isPlacingMode, setIsPlacingMode] = useState(false)
+  const [selectedPlot, setSelectedPlot] = useState<FarmPlot | null>(null)
+  const [showPlotModal, setShowPlotModal] = useState(false)
   const [gameStats, setGameStats] = useState<GameStats>({
     playTime: 0,
     plotsCreated: 0,
     cropsHarvested: 0,
-    resourcesGathered: 0
-  });
-  const [showStats, setShowStats] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
-  const [center, setCenter] = useState<[number, number]>([-9.9306, -76.2422]);
-  const [capaActiva, setCapaActiva] = useState<'truecolor' | 'ndvi' | 'thermal' | 'fire' | 'night'>('truecolor');
-  const mapRef = useRef<L.Map>(null);
+    resourcesGathered: 0,
+  })
+  const [showStats, setShowStats] = useState(false)
+  const [isPaused, setIsPaused] = useState(false)
+  const [center, setCenter] = useState<[number, number]>([-9.9306, -76.2422])
+  const [capaActiva, setCapaActiva] = useState<"truecolor" | "ndvi" | "thermal" | "night">("truecolor")
+  const [userLocation, setUserLocation] = useState<UserLocation | null>(null)
+  const mapRef = useRef<L.Map>(null)
 
   const capasDisponibles = {
     truecolor: {
-      nombre: '🌍 Color Real',
-      url: 'https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/VIIRS_NOAA20_CorrectedReflectance_TrueColor/default/2025-10-05/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg',
-      opacity: 0.8
+      nombre: "🌍 Color Real",
+      url: "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/VIIRS_NOAA20_CorrectedReflectance_TrueColor/default/2025-10-05/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg",
+      opacity: 0.8,
     },
     ndvi: {
-      nombre: '🌱 Vegetación',
-      url: 'https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Terra_NDVI_8Day/default/2025-10-05/GoogleMapsCompatible_Level7/{z}/{y}/{x}.png',
-      opacity: 0.7
+      nombre: "🌱 Vegetación",
+      url: "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Terra_NDVI_8Day/default/2025-10-05/GoogleMapsCompatible_Level7/{z}/{y}/{x}.png",
+      opacity: 0.7,
     },
     thermal: {
-      nombre: '🌡️ Temperatura',
-      url: 'https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Terra_Land_Surface_Temp_Day/default/2025-10-05/GoogleMapsCompatible_Level7/{z}/{y}/{x}.png',
-      opacity: 0.6
-    },
-    fire: {
-      nombre: '🔥 Incendios',
-      url: 'https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Aqua_Thermal_Anomalies_All/default/2025-10-05/GoogleMapsCompatible_Level9/{z}/{y}/{x}.png',
-      opacity: 0.8
+      nombre: "🌡️ Temperatura",
+      url: "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Terra_Land_Surface_Temp_Day/default/2025-10-05/GoogleMapsCompatible_Level7/{z}/{y}/{x}.png",
+      opacity: 0.6,
     },
     night: {
-      nombre: '🌙 Vista Nocturna',
-      url: 'https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/VIIRS_Black_Marble/default/2016-01-01/GoogleMapsCompatible_Level8/{z}/{y}/{x}.png',
-      opacity: 0.9
-    }
-  } as const;
+      nombre: "🌙 Vista Nocturna",
+      url: "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/VIIRS_Black_Marble/default/2016-01-01/GoogleMapsCompatible_Level8/{z}/{y}/{x}.png",
+      opacity: 0.9,
+    },
+  } as const
 
   // Game timer
   useEffect(() => {
     const timer = setInterval(() => {
       if (!isPaused) {
-        setGameStats(prev => ({
+        setGameStats((prev) => ({
           ...prev,
-          playTime: prev.playTime + 1
-        }));
+          playTime: prev.playTime + 1,
+        }))
       }
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [isPaused]);
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [isPaused])
 
-  // GPS function
   const obtenerUbicacionActual = (): void => {
     if (!navigator.geolocation) {
-      alert('Tu navegador no soporta geolocalización.');
-      return;
+      alert("Tu navegador no soporta geolocalización.")
+      return
     }
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        const newCenter: [number, number] = [position.coords.latitude, position.coords.longitude];
-        setCenter(newCenter);
+        const newCenter: [number, number] = [position.coords.latitude, position.coords.longitude]
+        const newLocation: UserLocation = { lat: position.coords.latitude, lng: position.coords.longitude }
+
+        setCenter(newCenter)
+        setUserLocation(newLocation)
+
         if (mapRef.current) {
-          mapRef.current.setView(newCenter, 12);
+          mapRef.current.setView(newCenter, 15)
         }
       },
       (err) => {
-        console.error('Error obteniendo ubicación:', err);
-        alert('No se pudo obtener tu ubicación. Asegúrate de tener GPS activado.');
+        console.error("Error obteniendo ubicación:", err)
+        alert("No se pudo obtener tu ubicación. Asegúrate de tener GPS activado.")
       },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-    );
-  };
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
+    )
+  }
 
   // Handle map click for placing plot
   const handleMapClick = (latlng: [number, number]): void => {
-    if (!isPlacingMode || isPaused || farmPlot) return;
+    if (!isPlacingMode || isPaused || farmPlot) return
 
     const newPlot: FarmPlot = {
       id: `plot-${Date.now()}`,
       position: { lat: latlng[0], lng: latlng[1] },
-      cultivated: false
-    };
+      cultivated: false,
+    }
 
-    setFarmPlot(newPlot);
-    setIsPlacingMode(false);
-    setGameStats(prev => ({ ...prev, plotsCreated: prev.plotsCreated + 1 }));
-  };
+    setFarmPlot(newPlot)
+    setIsPlacingMode(false)
+    setGameStats((prev) => ({ ...prev, plotsCreated: prev.plotsCreated + 1 }))
+  }
 
   // Handle plot click
   const handlePlotClick = (plot: FarmPlot): void => {
-    setSelectedPlot(plot);
-    setShowPlotModal(true);
-  };
+    setSelectedPlot(plot)
+    setShowPlotModal(true)
+  }
 
   // Access plot
   const handleAccessPlot = (): void => {
-    onMode3d();
+    onMode3d()
     //console.log('Accediendo al terreno...');
-    setShowPlotModal(false);
+    setShowPlotModal(false)
     // Aquí puedes agregar lógica para acceder al terreno
-  };
+  }
 
   // Delete plot
   const handleDeletePlot = (): void => {
-    setFarmPlot(null);
-    setSelectedPlot(null);
-    setShowPlotModal(false);
-  };
+    setFarmPlot(null)
+    setSelectedPlot(null)
+    setShowPlotModal(false)
+  }
 
   // Format time
   const formatTime = (seconds: number): string => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins}:${secs.toString().padStart(2, "0")}`
+  }
 
   return (
     <div className="w-full h-screen bg-gradient-to-br from-emerald-50 to-teal-100 relative overflow-hidden flex flex-col font-sans antialiased">
       {/* Top Bar - Resources */}
       <div className="absolute top-4 left-1/2 transform -translate-x-1/2 flex space-x-3 z-50">
         {resources.map((resource, index) => {
-          const isActive = resource.layerKey === capaActiva;
+          const isActive = resource.layerKey === capaActiva
           return (
             <div
               key={index}
@@ -304,7 +318,7 @@ const MapaComponente: React.FC<MapaComponentProps> = ({ onMode3d }) => {
               className={`
                 flex items-center space-x-2 bg-white/95 backdrop-blur-md px-5 py-2.5 rounded-xl shadow-lg border-2
                 cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-105
-                ${isActive ? 'border-blue-500 shadow-xl bg-blue-50/95' : 'border-white/50'}
+                ${isActive ? "border-blue-500 shadow-xl bg-blue-50/95" : "border-white/50"}
               `}
             >
               <span className="text-xl">{resource.icon}</span>
@@ -313,7 +327,7 @@ const MapaComponente: React.FC<MapaComponentProps> = ({ onMode3d }) => {
                 <span className="text-lg font-bold text-gray-800">{resource.amount}</span>
               </div>
             </div>
-          );
+          )
         })}
       </div>
 
@@ -324,9 +338,7 @@ const MapaComponente: React.FC<MapaComponentProps> = ({ onMode3d }) => {
             <span className="text-xl">🌾</span>
             <span className="font-bold">MODO CONSTRUCCIÓN</span>
           </div>
-          <div className="text-sm text-emerald-100">
-            Haz clic en el mapa para colocar un terreno cultivable
-          </div>
+          <div className="text-sm text-emerald-100">Haz clic en el mapa para colocar un terreno cultivable</div>
           <div className="mt-2">
             <button
               onClick={() => setIsPlacingMode(false)}
@@ -340,15 +352,10 @@ const MapaComponente: React.FC<MapaComponentProps> = ({ onMode3d }) => {
 
       {/* World Map */}
       <div className="flex-1 relative overflow-hidden z-10">
-        <MapContainer
-          ref={mapRef}
-          center={center}
-          zoom={12}
-          className="h-full w-full"
-        >
+        <MapContainer ref={mapRef} center={center} zoom={12} className="h-full w-full">
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution='&copy; OpenStreetMap contributors'
+            attribution="&copy; OpenStreetMap contributors"
           />
           <TileLayer
             key={capaActiva}
@@ -357,18 +364,16 @@ const MapaComponente: React.FC<MapaComponentProps> = ({ onMode3d }) => {
             opacity={capasDisponibles[capaActiva].opacity}
           />
 
-          <GameMapClickHandler
-            onMapClick={handleMapClick}
-            isPlacingMode={isPlacingMode}
-          />
+          <GameMapClickHandler onMapClick={handleMapClick} isPlacingMode={isPlacingMode} />
 
+          {userLocation && <Marker position={[userLocation.lat, userLocation.lng]} icon={getCurrentLocationIcon()} />}
           {/* Farm Plot Marker */}
           {farmPlot && (
             <Marker
               position={[farmPlot.position.lat, farmPlot.position.lng]}
               icon={getPlotIcon()}
               eventHandlers={{
-                click: () => handlePlotClick(farmPlot)
+                click: () => handlePlotClick(farmPlot),
               }}
             />
           )}
@@ -414,7 +419,7 @@ const MapaComponente: React.FC<MapaComponentProps> = ({ onMode3d }) => {
           className="w-14 h-14 bg-white/95 backdrop-blur-md rounded-xl flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-white/50 hover:scale-110 hover:border-orange-400"
           title={isPaused ? "Reanudar" : "Pausar"}
         >
-          <span className="text-2xl">{isPaused ? '▶️' : '⏸️'}</span>
+          <span className="text-2xl">{isPaused ? "▶️" : "⏸️"}</span>
         </button>
 
         <div className="h-px bg-gray-300 my-1"></div>
@@ -424,8 +429,8 @@ const MapaComponente: React.FC<MapaComponentProps> = ({ onMode3d }) => {
           disabled={isPaused || farmPlot !== null}
           className={`
             w-14 h-14 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 border-2 hover:scale-110
-            ${isPlacingMode ? 'border-yellow-400 ring-2 ring-yellow-300' : 'border-emerald-400'}
-            ${(isPaused || farmPlot) ? 'opacity-50 cursor-not-allowed' : ''}
+            ${isPlacingMode ? "border-yellow-400 ring-2 ring-yellow-300" : "border-emerald-400"}
+            ${isPaused || farmPlot ? "opacity-50 cursor-not-allowed" : ""}
           `}
           title={farmPlot ? "Ya tienes un terreno" : "Construir terreno"}
         >
@@ -494,6 +499,7 @@ const MapaComponente: React.FC<MapaComponentProps> = ({ onMode3d }) => {
           <span>⏱️ {formatTime(gameStats.playTime)}</span>
           {isPaused && <span className="text-yellow-400 font-bold">• PAUSADO</span>}
           {farmPlot && <span className="text-green-400">• 🌾 Terreno activo</span>}
+          {userLocation && <span className="text-blue-400">• 📍 GPS activo</span>}
         </div>
       </div>
 
@@ -503,13 +509,11 @@ const MapaComponente: React.FC<MapaComponentProps> = ({ onMode3d }) => {
       </div>
 
       {/* Version info */}
-      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-xs text-gray-600 z-20">
-        v1.0.0
-      </div>
+      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-xs text-gray-600 z-20">v1.0.0</div>
 
-      {/* Breathing animation styles */}
-      <style dangerouslySetInnerHTML={{
-        __html: `
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
         @keyframes breathe {
           0%, 100% { 
             transform: translate(-50%, -50%) scale(1);
@@ -520,13 +524,55 @@ const MapaComponente: React.FC<MapaComponentProps> = ({ onMode3d }) => {
             opacity: 0.3;
           }
         }
+        @keyframes pulse {
+          0%, 100% { 
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 0.8;
+          }
+          50% { 
+            transform: translate(-50%, -50%) scale(1.3);
+            opacity: 0.3;
+          }
+        }
         .custom-div-icon {
           background: transparent !important;
           border: none !important;
         }
-      `}} />
+        .current-location-marker {
+          position: relative;
+        }
+        .current-location-marker::before {
+          content: '';
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 60px;
+          height: 60px;
+          border: 3px solid #3b82f6;
+          border-radius: 50%;
+          animation: pulse 2s ease-in-out infinite;
+          pointer-events: none;
+        }
+        .current-location-marker::after {
+          content: '';
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 75px;
+          height: 75px;
+          border: 2px solid #3b82f6;
+          border-radius: 50%;
+          animation: pulse 2s ease-in-out infinite 0.5s;
+          opacity: 0.5;
+          pointer-events: none;
+        }
+      `,
+        }}
+      />
     </div>
-  );
-};
+  )
+}
 
-export default MapaComponente;
+export default MapaComponente
