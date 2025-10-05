@@ -1,8 +1,10 @@
-
+// src/context/GameContext.tsx
 import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import type { ReactNode } from 'react';
 
-
+//
+// 🌱 Interfaces base
+//
 interface Crop {
   name: string;
   region: 'Costa' | 'Sierra' | 'Selva';

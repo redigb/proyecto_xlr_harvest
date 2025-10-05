@@ -6,6 +6,9 @@ import ErrorBoundary from './leo_integracion/three/ErrorBoundary';
 import { createCropsForPlot } from './leo_integracion/three/Terreno';
 import * as THREE from 'three';
 
+// context
+import { useGame } from '../../context/GameContext';
+
 // ---------------------------------------------------------------------
 // Tipos unificados (definidos directamente)
 // ---------------------------------------------------------------------
@@ -35,6 +38,22 @@ interface SectorData {
 // ---------------------------------------------------------------------
 
 const VistaTerreno3d: React.FC = () => {
+
+
+  const { gameState, startGame, updateScore, selectCrop } = useGame();
+
+  // Iniciar el juego demo con región Sierra
+  useEffect(() => {
+    if (!gameState.isPlaying) {
+      console.log('🎮 Iniciando demo Sierra...');
+      startGame();
+
+      // Para la demo: fuerza región Sierra
+      gameState.region = 'Sierra';
+      gameState.message = '🌄 Modo demo Sierra activado';
+    }
+  }, [gameState.isPlaying, startGame]);
+
   const [sectorSeleccionado, setSectorSeleccionado] = useState<SectorData | null>(null);
   const [panelAbierto, setPanelAbierto] = useState<boolean>(true);
 
