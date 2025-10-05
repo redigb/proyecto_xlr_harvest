@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { GameProvider } from './context/GameContext';
+import { GameProvider, useGame } from './context/GameContext';
 import { SettingsProvider } from './context/SettingsContext';
 import { AudioProvider } from './context/AudioContext';
 import GameContainer from './components/layout/GameContainer';
@@ -8,10 +8,11 @@ import SettingsMenu from './components/settings/SettingsMenu';
 import CreditsScreen from './components/credits/CreditsScreen';
 import ScreenTransition from './components/layout/ScreenTransition';
 
-// Componentes de las vistas
+// Componentes del juego
 import Mapa from './components/mapa/mapa';
+import PlayerNameModal from './components/modals/PlayerNameModal';
 
-// Tipos de pantallas del juego
+// Tipos de pantallas
 export type Screen =
   | 'main'
   | 'start'
@@ -29,21 +30,74 @@ export type SettingsSection =
   | 'brightness'
   | 'speed';
 
+//
+// 🌱 Subcomponente: pantalla de inicio del juego con detección de nombre
+//
+const StartScreen: React.FC = () => {
+  const { gameState, startGame } = useGame();
+  const [showWelcome, setShowWelcome] = useState(false);
+
+  const hasName =
+    Boolean(gameState.playerName && gameState.playerName !== 'Jugador');
+
+  // Si ya tiene nombre guardado, mostrar animación de bienvenida
+  useEffect(() => {
+    if (hasName) {
+      setShowWelcome(true);
+      const timer = setTimeout(() => {
+        setShowWelcome(false);
+        startGame(); // inicia automáticamente
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [hasName, startGame]);
+
+  if (!hasName) {
+    // Mostrar modal para ingresar nombre antes de iniciar
+    return <PlayerNameModal />;
+  }
+
+  // Animación de bienvenida cuando ya se reconoce al jugador
+  if (showWelcome) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-green-800 to-green-950 text-white animate-fadeIn">
+        <div className="text-center">
+          <h2 className="text-4xl font-display mb-3 animate-pulse">
+            👩‍🌾 ¡Bienvenido de nuevo!
+          </h2>
+          <p className="text-lg opacity-90">
+            {gameState.playerName}, tu campo te espera 🌾
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Si todo está listo, cargar el mapa principal
+  return (
+    <SettingsProvider>
+      <AudioProvider>
+        <Mapa />
+      </AudioProvider>
+    </SettingsProvider>
+  );
+};
+
+//
+// 🌾 Componente principal del juego
+//
 const App: React.FC = () => {
   const [currentScreen, setCurrentScreen] = useState<Screen>('main');
   const [isLoading, setIsLoading] = useState(true);
   const [isTransitioning, setIsTransitioning] = useState(false);
 
-  // Simulación de pantalla de carga inicial
+  // Simulación de carga inicial
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1500);
-
+    const timer = setTimeout(() => setIsLoading(false), 1500);
     return () => clearTimeout(timer);
   }, []);
 
-  // Navegación con transición
+  // Navegación entre pantallas
   const navigateTo = (screen: Screen) => {
     setIsTransitioning(true);
     setTimeout(() => {
@@ -52,7 +106,7 @@ const App: React.FC = () => {
     }, 300);
   };
 
-  // Renderizar pantalla actual (solo para menús)
+  // Renderizar pantalla actual
   const renderScreen = () => {
     switch (currentScreen) {
       case 'main':
@@ -123,20 +177,20 @@ const App: React.FC = () => {
     );
   }
 
-
+  //
+  // 🔹 Pantalla de juego (Start)
+  //
   if (currentScreen === 'start') {
     return (
       <GameProvider>
-        <SettingsProvider>
-          <AudioProvider>
-            {/* Aquí empieza la escena real del juego */}
-            <Mapa />
-          </AudioProvider>
-        </SettingsProvider>
+        <StartScreen />
       </GameProvider>
     );
   }
 
+  //
+  // 🔹 Menús generales
+  //
   return (
     <GameProvider>
       <SettingsProvider>

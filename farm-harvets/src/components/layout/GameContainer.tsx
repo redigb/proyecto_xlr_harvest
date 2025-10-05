@@ -7,9 +7,9 @@ interface GameContainerProps {
   backgroundImage?: string;
 }
 
-const GameContainer: React.FC<GameContainerProps> = ({ 
-  children, 
-  showHeader = true, 
+const GameContainer: React.FC<GameContainerProps> = ({
+  children,
+  showHeader = true,
   showFooter = true,
   backgroundImage = "/assets/images/backgrounds/imagenfondo.png"
 }) => {
@@ -18,21 +18,21 @@ const GameContainer: React.FC<GameContainerProps> = ({
       {/* 🎨 FONDO CON IMAGEN Y OVERLAYS */}
       <div className="absolute inset-0 z-0">
         {/* Imagen de fondo */}
-        <div 
+        <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
             backgroundImage: `url('${backgroundImage}')`,
           }}
         />
-        
+
         {/* Overlay oscuro para mejorar legibilidad */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70" />
-        
+
         {/* Overlay de color temático */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary-900/20 via-primary-800/15 to-accent-sun-900/10" />
-        
+
         {/* Patrón sutil de textura */}
-        <div 
+        <div
           className="absolute inset-0 opacity-10"
           style={{
             backgroundImage: `
@@ -45,7 +45,7 @@ const GameContainer: React.FC<GameContainerProps> = ({
 
       {/* 🎪 CONTENEDOR DE CONTENIDO */}
       <div className="relative z-10 min-h-screen flex flex-col">
-        
+
         {/* 🏰 HEADER ESTILO CLASH ROYALE */}
         {showHeader && (
           <header className="absolute top-0 left-0 right-0 z-20 p-6">
@@ -59,7 +59,7 @@ const GameContainer: React.FC<GameContainerProps> = ({
                     alt="Harvest Logo"
                     className="w-24 h-24 transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 group-hover:brightness-125 drop-shadow-game-lg cursor-pointer"
                   />
-                                    
+
                   {/* Partículas alrededor del logo mejoradas */}
                   <div className="absolute -top-2 -right-2 w-4 h-4 bg-accent-sun-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-200 animate-ping" />
                   <div className="absolute -bottom-2 -left-2 w-3 h-3 bg-primary-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-300 animate-ping" />
@@ -83,8 +83,8 @@ const GameContainer: React.FC<GameContainerProps> = ({
         {showFooter && (
           <footer className="absolute bottom-0 left-0 right-0 z-20 p-6">
             <div className="flex justify-between items-center">
-              
-              
+
+
 
               {/* Copyright con mejor contraste */}
               <div className="text-center bg-white/5 backdrop-blur-lg rounded-game-lg px-6 py-3 border border-white/10">
@@ -112,7 +112,7 @@ const GameContainer: React.FC<GameContainerProps> = ({
         {/* Bordes luminosos sutiles */}
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary-400/30 to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-accent-sun-400/20 to-transparent" />
-        
+
         {/* Esquinas decorativas transparentes */}
         <div className="absolute top-4 left-4 w-8 h-8 border-t-2 border-l-2 border-primary-400/30 rounded-tl-lg" />
         <div className="absolute top-4 right-4 w-8 h-8 border-t-2 border-r-2 border-primary-400/30 rounded-tr-lg" />
@@ -121,7 +121,7 @@ const GameContainer: React.FC<GameContainerProps> = ({
       </div>
 
       {/* 🌟 EFECTO VIGNETTE MEJORADO */}
-      <div 
+      <div
         className="absolute inset-0 pointer-events-none z-1"
         style={{
           background: 'radial-gradient(ellipse at center, transparent 40%, rgba(0, 0, 0, 0.5) 100%)',
