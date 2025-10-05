@@ -1,7 +1,7 @@
 # 🌾 XLR Harvest 3D  
 **Sustainable Farming Simulator using NASA Earth Data**
 
-## 📖 Descripción
+## 📖 Description
 
 **XLR Harvest 3D** es un juego educativo interactivo desarrollado con **Three.js** y **Leaflet**, que utiliza datos reales de la **NASA** (SMAP, GPM, MODIS) para simular prácticas agrícolas sostenibles.
 
