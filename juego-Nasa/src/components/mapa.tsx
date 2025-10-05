@@ -170,8 +170,8 @@ const ManualLocationModal: React.FC<{
   onClose: () => void;
   onSetLocation: (lat: number, lng: number) => void;
 }> = ({ isOpen, onClose, onSetLocation }) => {
-  const [lat, setLat] = useState('-12.0464');
-  const [lng, setLng] = useState('-77.0428');
+  const [lat, setLat] = useState('-9.9306');
+  const [lng, setLng] = useState('-76.2422');
 
   if (!isOpen) return null;
 
@@ -200,7 +200,7 @@ const ManualLocationModal: React.FC<{
               value={lat}
               onChange={(e) => setLat(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              placeholder="-12.0464"
+              placeholder="-9.9306"
             />
           </div>
           <div>
@@ -211,7 +211,7 @@ const ManualLocationModal: React.FC<{
               value={lng}
               onChange={(e) => setLng(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              placeholder="-77.0428"
+              placeholder="-76.2422"
             />
           </div>
           <div className="flex space-x-3">
@@ -231,7 +231,7 @@ const ManualLocationModal: React.FC<{
           </div>
         </form>
         <p className="text-xs text-gray-500 mt-2 text-center">
-          Ejemplo: Lima, Perú (-12.0464, -77.0428)
+          Ejemplo: Huánuco, Perú (-9.9306, -76.2422)
         </p>
       </div>
     </div>
@@ -315,15 +315,6 @@ const LettuceIcon: React.FC<{ growth?: number; className?: string }> = ({ growth
   </svg>
 );
 
-const PumpkinIcon: React.FC<{ growth?: number; className?: string }> = ({ growth = 100, className = "" }) => (
-  <svg className={className} viewBox="0 0 64 64" fill="none">
-    <circle cx="32" cy={48 - (growth / 100 * 20)} r={10 + (growth / 100 * 6)} fill="#e67e22"/>
-    <path d="M32 28C36 32 36 38 32 42C28 38 28 32 32 28Z" fill="#d35400" opacity={growth > 60 ? 1 : 0}/>
-    <rect x="30" y={48 - (growth / 100 * 20)} width="4" height={growth / 100 * 20} fill="#8b4513"/>
-    <path d="M28 24L32 20L36 24" stroke="#27ae60" strokeWidth="1.5" fill="none" opacity={growth > 40 ? 1 : 0}/>
-  </svg>
-);
-
 const WellIcon: React.FC<{ className?: string }> = ({ className = "" }) => (
   <svg className={className} viewBox="0 0 64 64" fill="none">
     <circle cx="32" cy="40" r="12" fill="#95a5a6"/>
@@ -357,7 +348,7 @@ const GameUI: React.FC = () => {
   });
   const [showStats, setShowStats] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-  const [center, setCenter] = useState<[number, number]>([-12.0464, -77.0428]);
+  const [center, setCenter] = useState<[number, number]>([-9.9306, -76.2422]);
   const [capaActiva, setCapaActiva] = useState<'truecolor' | 'ndvi' | 'thermal' | 'fire' | 'night'>('truecolor');
   const [showManualModal, setShowManualModal] = useState(false);
   const mapRef = useRef<L.Map>(null);
@@ -399,39 +390,6 @@ const GameUI: React.FC = () => {
       lng: center[1] + deltaLng
     };
   };
-
-  // Initialize farm plots
-  useEffect(() => {
-    const initialPercentPlots = [
-      // Zona Norte
-      { id: 'plot-n1', position: { x: 25, y: 25 }, size: 'medium' as const, cultivated: false },
-      { id: 'plot-n2', position: { x: 35, y: 25 }, size: 'medium' as const, cultivated: false },
-      { id: 'plot-n3', position: { x: 45, y: 25 }, size: 'medium' as const, cultivated: false },
-      
-      // Zona Centro
-      { id: 'plot-c1', position: { x: 20, y: 50 }, size: 'medium' as const, cultivated: false },
-      { id: 'plot-c2', position: { x: 30, y: 50 }, size: 'medium' as const, cultivated: false },
-      { id: 'plot-c3', position: { x: 40, y: 50 }, size: 'medium' as const, cultivated: false },
-      { id: 'plot-c4', position: { x: 50, y: 50 }, size: 'medium' as const, cultivated: false },
-      // Zona Sur
-      { id: 'plot-s1', position: { x: 25, y: 75 }, size: 'medium' as const, cultivated: false },
-      { id: 'plot-s2', position: { x: 35, y: 75 }, size: 'medium' as const, cultivated: false },
-      { id: 'plot-s3', position: { x: 45, y: 75 }, size: 'medium' as const, cultivated: false },
-      
-      // Zona Este
-      { id: 'plot-e1', position: { x: 65, y: 50 }, size: 'medium' as const, cultivated: false },
-      { id: 'plot-e2', position: { x: 75, y: 50 }, size: 'medium' as const, cultivated: false },
-      
-      // Zona Oeste
-      { id: 'plot-w1', position: { x: 15, y: 50 }, size: 'medium' as const, cultivated: false },
-      { id: 'plot-w2', position: { x: 5, y: 50 }, size: 'medium' as const, cultivated: false },
-    ];
-    const initialPlots: FarmPlot[] = initialPercentPlots.map(p => ({
-      ...p,
-      position: getPositionFromPercent(p.position.x, p.position.y)
-    }));
-    setFarmPlots(initialPlots);
-  }, [center]);
 
   // Game timer
   useEffect(() => {
@@ -482,15 +440,6 @@ const GameUI: React.FC = () => {
       category: 'farming',
       description: 'Prepara tierra para cultivar',
       icon: <FarmPlotIcon className="w-8 h-8" />
-    },
-    { 
-      id: 'pumpkin-seed', 
-      name: 'Semilla de Calabaza', 
-      cost: 0, 
-      resourceType: 'pumpkin', 
-      category: 'farming',
-      description: 'Planta calabazas en terreno cultivable',
-      icon: <PumpkinIcon className="w-8 h-8" />
     },
   ];
 
