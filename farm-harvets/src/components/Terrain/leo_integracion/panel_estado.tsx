@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import * as THREE from 'three';
 
 // ------------------ Tipos base ------------------
@@ -19,6 +19,7 @@ export interface Plot extends THREE.Object3D {
 export interface SectorData {
   id: number;
   plot: Plot;
+  position?: { lat: number; lng: number }; // GPS de la parcela (de MapaComponente)
 }
 
 interface PanelEstadoProps {
@@ -28,13 +29,14 @@ interface PanelEstadoProps {
   onWater: (plot: Plot) => void;
 }
 
-// ------------------ COMPONENTE ------------------
 const PanelEstado: React.FC<PanelEstadoProps> = ({
   sectorSeleccionado,
   onPlant,
   onHarvest,
   onWater,
 }) => {
+  const [weatherNotAvailable, setWeatherNotAvailable] = useState(true); // Sin API key
+
   // 🪴 Estado inicial sin selección
   if (!sectorSeleccionado) {
     return (
@@ -115,6 +117,18 @@ const PanelEstado: React.FC<PanelEstadoProps> = ({
               </p>
             </div>
           </div>
+        </div>
+
+        {/* Datos climáticos (no disponibles) */}
+        <div className="bg-white/60 rounded-game-lg border-2 border-accent-soil/20 p-4">
+          <h4 className="text-gradient-sun text-lg font-game mb-3 text-center">🌤️ Condiciones Actuales</h4>
+          {weatherNotAvailable ? (
+            <div className="text-center text-game-muted">
+              Datos climáticos no disponibles (sin API key)
+            </div>
+          ) : (
+            <div className="text-center text-game-muted animate-pulse">Cargando datos climáticos...</div>
+          )}
         </div>
 
         {/* Estado del cultivo */}
@@ -240,7 +254,7 @@ const PanelEstado: React.FC<PanelEstadoProps> = ({
 
         {/* Cultivo en crecimiento */}
         {hasCrop && !isGrown && (
-          <div className=" from-accent-sun-50 to-yellow-50 rounded-game-lg p-5 border-2 border-accent-sun/30 text-center animate-pulse-sun">
+          <div className="from-accent-sun-50 to-yellow-50 rounded-game-lg p-5 border-2 border-accent-sun/30 text-center animate-pulse-sun">
             <div className="w-16 h-16 mx-auto mb-3 bg-accent-sun-100 rounded-full flex items-center justify-center border-2 border-accent-sun/50">
               <span className="text-2xl">⏳</span>
             </div>

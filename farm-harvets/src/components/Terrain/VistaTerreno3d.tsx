@@ -3,18 +3,13 @@ import PanelEstado from './leo_integracion/panel_estado';
 import HeaderUI from './leo_integracion/header_ui';
 import Scene from './leo_integracion/three/Scene';
 import ErrorBoundary from './leo_integracion/three/ErrorBoundary';
-import { createCropsForPlot } from './leo_integracion/three/Terreno';
+import { createCropsForPlot, createRainEffect } from './leo_integracion/three/Terreno';
 import * as THREE from 'three';
-
-// context
 import { useGame } from '../../context/GameContext';
 
-// ---------------------------------------------------------------------
-// Tipos unificados (definidos directamente)
-// ---------------------------------------------------------------------
-
+// Tipos
 interface PlotUserData {
-  id: number; // 👈 número, no string
+  id: number;
   isWatered?: boolean;
   crop?: string | null;
   isGrown?: boolean;
@@ -31,41 +26,50 @@ interface Plot extends THREE.Object3D {
 interface SectorData {
   id: number;
   plot: Plot;
+  position?: { lat: number; lng: number };
 }
 
-// ---------------------------------------------------------------------
-// Componente principal
-// ---------------------------------------------------------------------
+interface FarmPlot {
+  id: string;
+  position: { lat: number; lng: number };
+  cultivated: boolean;
+  cropType?: string;
+  growth?: number;
+  health?: number;
+  resources?: { water: number; nutrients: number };
+}
 
-const VistaTerreno3d: React.FC = () => {
+interface VistaTerreno3dProps {
+  selectedPlot: FarmPlot | null;
+}
 
-
+const VistaTerreno3d: React.FC<VistaTerreno3dProps> = ({ selectedPlot }) => {
   const { gameState, startGame, updateScore, selectCrop } = useGame();
+  const [sectorSeleccionado, setSectorSeleccionado] = useState<SectorData | null>(null);
+  const [panelAbierto, setPanelAbierto] = useState<boolean>(true);
 
-  // Iniciar el juego demo con región Sierra
+  // Iniciar juego demo con región Sierra
   useEffect(() => {
     if (!gameState.isPlaying) {
       console.log('🎮 Iniciando demo Sierra...');
       startGame();
-
-      // Para la demo: fuerza región Sierra
       gameState.region = 'Sierra';
       gameState.message = '🌄 Modo demo Sierra activado';
     }
-  }, [gameState.isPlaying, startGame]);
+  }, [gameState.isPlaying, startGame, gameState]);
 
-  const [sectorSeleccionado, setSectorSeleccionado] = useState<SectorData | null>(null);
-  const [panelAbierto, setPanelAbierto] = useState<boolean>(true);
-
-  useEffect(() => {
-    console.log('Componente VistaTerreno3d montado');
-    return () => console.log('Componente VistaTerreno3d desmontado');
-  }, []);
-
-  // Selección de parcela
+  // Manejar selección de parcela desde Scene
   const handleSectorClick = useCallback((sectorData: SectorData | null) => {
-    setSectorSeleccionado(sectorData);
-  }, []);
+    console.log('Sector seleccionado en 3D:', sectorData);
+    if (sectorData) {
+      setSectorSeleccionado({
+        ...sectorData,
+        position: selectedPlot?.position, // Mantener GPS
+      });
+    } else {
+      setSectorSeleccionado(null);
+    }
+  }, [selectedPlot]);
 
   // Regar parcela
   const handleWater = useCallback(
@@ -84,22 +88,24 @@ const VistaTerreno3d: React.FC = () => {
       try {
         plot.userData.isWatered = true;
 
-        // Cambiar color a marrón oscuro (húmedo)
         const base = plot.children[0] as THREE.Mesh;
         const material = base?.material as THREE.MeshStandardMaterial;
         if (material) {
           const wetSoilColor = 0x654321;
           material.color.set(wetSoilColor);
+          console.log('Color cambiado a marrón oscuro (húmedo)');
         }
 
+        createRainEffect(plot as any);
         setSectorSeleccionado(prev =>
-          prev ? { ...prev, plot } : { id: plot.userData.id, plot }
+          prev ? { ...prev, plot } : { id: plot.userData.id, plot, position: selectedPlot?.position }
         );
+        console.log('Riego exitoso:', { id: plot.userData.id });
       } catch (error) {
         console.error('Error al regar:', error);
       }
     },
-    []
+    [selectedPlot]
   );
 
   // Plantar cultivo
@@ -121,18 +127,18 @@ const VistaTerreno3d: React.FC = () => {
         plot.userData.plantTime = Date.now();
         plot.userData.isGrown = false;
 
-        createCropsForPlot(plot, 3.0, cropType);
+        createCropsForPlot(plot as any, 3.0, cropType);
         setSectorSeleccionado(prev =>
-          prev ? { ...prev, plot } : { id: plot.userData.id, plot }
+          prev ? { ...prev, plot } : { id: plot.userData.id, plot, position: selectedPlot?.position }
         );
+        selectCrop(cropType);
+        console.log('Plantación exitosa:', { id: plot.userData.id, crop: cropType });
       } catch (error) {
         console.error('Error al plantar:', error);
       }
     },
-    []
+    [selectedPlot, selectCrop]
   );
-
-
 
   // Cosechar cultivo
   const handleHarvest = useCallback((plot: Plot | null) => {
@@ -141,6 +147,7 @@ const VistaTerreno3d: React.FC = () => {
       return;
     }
 
+    console.log(`Cosechando parcela ${plot.userData.id}`);
     try {
       if (plot.userData.crops) {
         plot.userData.crops.forEach(crop => {
@@ -161,13 +168,16 @@ const VistaTerreno3d: React.FC = () => {
       const material = base?.material as THREE.MeshStandardMaterial;
       if (material) {
         material.color.set(0xd2b48c);
+        console.log('Color restaurado a marrón claro (seco)');
       }
 
       setSectorSeleccionado(null);
+      updateScore(100);
+      console.log('Cosecha exitosa:', { id: plot.userData.id });
     } catch (error) {
       console.error('Error al cosechar:', error);
     }
-  }, []);
+  }, [updateScore]);
 
   const togglePanel = useCallback(() => setPanelAbierto(prev => !prev), []);
 
@@ -176,7 +186,7 @@ const VistaTerreno3d: React.FC = () => {
       <div className="flex-1 relative">
         <HeaderUI />
         <ErrorBoundary>
-          <Scene onSectorClick={handleSectorClick} />
+          <Scene onSectorClick={handleSectorClick} selectedPlot={selectedPlot} />
         </ErrorBoundary>
 
         <button
@@ -187,10 +197,10 @@ const VistaTerreno3d: React.FC = () => {
         </button>
       </div>
 
-      {/* Panel lateral */}
       <div
-        className={`w-80 h-full bg-gray-800 text-white fixed right-0 top-0 transform transition-transform duration-300 ease-in-out z-20 overflow-y-auto font-luckiest text-lg ${panelAbierto ? 'translate-x-0' : 'translate-x-full'
-          } md:static md:w-80 md:translate-x-0`}
+        className={`w-80 h-full bg-gray-800 text-white fixed right-0 top-0 transform transition-transform duration-300 ease-in-out z-20 overflow-y-auto font-luckiest text-lg ${
+          panelAbierto ? 'translate-x-0' : 'translate-x-full'
+        } md:static md:w-80 md:translate-x-0`}
       >
         <div className="p-4">
           <div className="flex justify-between items-center mb-4">
