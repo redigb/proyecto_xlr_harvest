@@ -16,7 +16,7 @@ const MainMenu: React.FC<MainMenuProps> = ({ onNavigate }) => {
     {
       id: 'start',
       label: 'START GAME',
-      icon: '⚔️',
+      icon: '🌾',
       description: 'Begin a new adventure',
       screen: 'start' as Screen,
     },
