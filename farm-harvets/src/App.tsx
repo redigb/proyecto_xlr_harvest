@@ -12,6 +12,7 @@ import ScreenTransition from './components/layout/ScreenTransition';
 import Mapa from './components/mapa/mapa';
 import PlayerNameModal from './components/modals/PlayerNameModal';
 
+// Tipos de pantallas
 export type Screen =
   | 'main'
   | 'start'
@@ -31,7 +32,7 @@ export type SettingsSection =
 
 //
 // 🌱 Subcomponente: pantalla de inicio del juego con detección de nombre
-// --
+//
 const StartScreen: React.FC = () => {
   const { gameState, startGame } = useGame();
   const [showWelcome, setShowWelcome] = useState(false);
@@ -187,9 +188,7 @@ const App: React.FC = () => {
     );
   }
 
-  //
-  // 🔹 Menús generales
-  //
+
   return (
     <GameProvider>
       <SettingsProvider>

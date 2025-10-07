@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import * as THREE from 'three';
 
 // ------------------ Tipos base ------------------
@@ -19,6 +19,13 @@ export interface Plot extends THREE.Object3D {
 export interface SectorData {
   id: number;
   plot: Plot;
+  position?: { lat: number; lng: number }; // GPS de la parcela (de MapaComponente)
+}
+
+interface WeatherData {
+  temperature: number; // °C
+  description: string; // Ej. "Cielo despejado"
+  icon: string; // Clase de ícono FontAwesome
 }
 
 interface PanelEstadoProps {
@@ -28,13 +35,89 @@ interface PanelEstadoProps {
   onWater: (plot: Plot) => void;
 }
 
-// ------------------ COMPONENTE ------------------
 const PanelEstado: React.FC<PanelEstadoProps> = ({
   sectorSeleccionado,
   onPlant,
   onHarvest,
   onWater,
 }) => {
+  const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
+  const [loadingWeather, setLoadingWeather] = useState(false);
+
+  // 🌤️ Fetch datos climáticos de Open-Meteo
+  useEffect(() => {
+    if (!sectorSeleccionado) {
+      // No hacer fetch si no hay parcela seleccionada
+      setWeatherData(null);
+      setLoadingWeather(false);
+      return;
+    }
+
+    const fetchWeather = async () => {
+      // Usar coordenadas de la parcela o Huanuco como fallback
+      const lat = sectorSeleccionado.position?.lat || -9.9306;
+      const lon = sectorSeleccionado.position?.lng || -76.2422;
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,weathercode&timezone=auto`;
+
+      try {
+        setLoadingWeather(true);
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('Error en la solicitud');
+        const data = await response.json();
+
+        // Extraer datos del clima actual
+        const hourly = data.hourly;
+        const now = new Date();
+        const currentHourIndex = Math.floor((now.getTime() - new Date(hourly.time[0]).getTime()) / (1000 * 3600));
+        const currentTemperature = hourly.temperature_2m[currentHourIndex];
+        const weatherCode = hourly.weathercode[currentHourIndex];
+
+        // Determinar descripción e ícono según weathercode
+        let description = 'Desconocido';
+        let icon = 'fas fa-question';
+        if (weatherCode === 0) {
+          description = 'Cielo despejado';
+          icon = 'fas fa-sun';
+        } else if ([1, 2, 3].includes(weatherCode)) {
+          description = 'Mayormente despejado';
+          icon = 'fas fa-cloud-sun';
+        } else if ([45, 48].includes(weatherCode)) {
+          description = 'Niebla';
+          icon = 'fas fa-smog';
+        } else if ([51, 53, 55].includes(weatherCode)) {
+          description = 'Lluvia ligera';
+          icon = 'fas fa-cloud-rain';
+        } else if ([61, 63, 65].includes(weatherCode)) {
+          description = 'Lluvia moderada';
+          icon = 'fas fa-cloud-showers-heavy';
+        } else if ([80, 81, 82].includes(weatherCode)) {
+          description = 'Lluvia fuerte';
+          icon = 'fas fa-cloud-rain';
+        } else if ([95, 96, 99].includes(weatherCode)) {
+          description = 'Tormenta';
+          icon = 'fas fa-bolt';
+        }
+
+        setWeatherData({
+          temperature: Math.round(currentTemperature),
+          description,
+          icon,
+        });
+        setLoadingWeather(false);
+      } catch (error) {
+        console.error('Error al obtener el clima:', error);
+        setWeatherData(null);
+        setLoadingWeather(false);
+      }
+    };
+
+    // Llamada inicial
+    fetchWeather();
+    // Actualizar cada 5 minutos
+    const interval = setInterval(fetchWeather, 300000); // 5 minutos = 300,000 ms
+    return () => clearInterval(interval); // Limpiar intervalo al desmontar
+  }, [sectorSeleccionado]); // Dependencia en sectorSeleccionado para actualizar si cambia la parcela
+
   // 🪴 Estado inicial sin selección
   if (!sectorSeleccionado) {
     return (
@@ -53,7 +136,7 @@ const PanelEstado: React.FC<PanelEstadoProps> = ({
   }
 
   // 🔍 Datos del sector seleccionado
-  const { id, plot } = sectorSeleccionado;
+  const { id, plot, position } = sectorSeleccionado;
   const plotData = plot?.userData || ({} as PlotUserData);
   const isWatered = plotData.isWatered ?? false;
   const hasCrop = !!plotData.crop;
@@ -113,6 +196,38 @@ const PanelEstado: React.FC<PanelEstadoProps> = ({
               >
                 {isWatered ? 'Húmedo - Listo' : 'Seco - Necesita agua'}
               </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Coordenadas y datos climáticos */}
+        <div className="bg-white/60 rounded-game-lg border-2 border-accent-soil/20 p-4">
+          <h4 className="text-gradient-sun text-lg font-game mb-3 text-center">🌍 Coordenadas y Clima</h4>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="text-center">
+              <p className="text-game-muted text-sm">Coordenadas</p>
+              <p className="text-game-dark text-lg font-bold mt-1">
+                Lat: {(position?.lat || -9.9306).toFixed(4)}
+              </p>
+              <p className="text-game-dark text-lg font-bold">
+                Lng: {(position?.lng || -76.2422).toFixed(4)}
+              </p>
+            </div>
+            <div className="text-center">
+              <p className="text-game-muted text-sm">Clima Actual</p>
+              {loadingWeather ? (
+                <div className="text-game-muted animate-pulse">Cargando datos climáticos...</div>
+              ) : weatherData ? (
+                <>
+                  <p className="text-2xl font-bold text-game-dark">
+                    <i className={`${weatherData.icon} mr-2`}></i>
+                    {weatherData.temperature}°C
+                  </p>
+                  <p className="text-sm text-game-muted">{weatherData.description}</p>
+                </>
+              ) : (
+                <div className="text-game-muted">Error al cargar el clima</div>
+              )}
             </div>
           </div>
         </div>
@@ -240,7 +355,7 @@ const PanelEstado: React.FC<PanelEstadoProps> = ({
 
         {/* Cultivo en crecimiento */}
         {hasCrop && !isGrown && (
-          <div className=" from-accent-sun-50 to-yellow-50 rounded-game-lg p-5 border-2 border-accent-sun/30 text-center animate-pulse-sun">
+          <div className="from-accent-sun-50 to-yellow-50 rounded-game-lg p-5 border-2 border-accent-sun/30 text-center animate-pulse-sun">
             <div className="w-16 h-16 mx-auto mb-3 bg-accent-sun-100 rounded-full flex items-center justify-center border-2 border-accent-sun/50">
               <span className="text-2xl">⏳</span>
             </div>
