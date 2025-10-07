@@ -262,7 +262,7 @@ function createBushes(group: THREE.Group, count: number, terrainSize: number) {
   for (let i = 0; i < count; i++) {
     const bush = new THREE.Group();
     const color = colors[Math.floor(Math.random() * colors.length)];
-    
+
     const main = new THREE.Mesh(
       new THREE.SphereGeometry(0.4, 8, 6),
       new THREE.MeshStandardMaterial({ color })
@@ -294,7 +294,7 @@ function createBushes(group: THREE.Group, count: number, terrainSize: number) {
       validPosition = distanceFromCenter > 8 && distanceFromCenter < 35;
     }
 
-    bush.position.set(x, 0, z);
+    bush.position.set(x as number, 0, z as number);
     bush.rotation.y = Math.random() * Math.PI * 2;
     const scale = 0.7 + Math.random() * 0.6;
     bush.scale.set(scale, scale, scale);
@@ -307,7 +307,7 @@ function createBushes(group: THREE.Group, count: number, terrainSize: number) {
 function createCows(group: THREE.Group, count: number, terrainSize: number) {
   for (let i = 0; i < count; i++) {
     const cow = new THREE.Group();
-    
+
     // Cuerpo
     const body = new THREE.Mesh(
       new THREE.SphereGeometry(0.4, 8, 6),
@@ -406,7 +406,7 @@ function createCows(group: THREE.Group, count: number, terrainSize: number) {
       validPosition = distanceFromCenter > 10 && distanceFromCenter < 30;
     }
 
-    cow.position.set(x, 0, z);
+    cow.position.set(x as number, 0, z as number);
     cow.rotation.y = Math.random() * Math.PI * 2;
     const scale = 0.8 + Math.random() * 0.4;
     cow.scale.set(scale, scale, scale);

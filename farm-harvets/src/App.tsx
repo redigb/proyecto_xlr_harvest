@@ -188,9 +188,7 @@ const App: React.FC = () => {
     );
   }
 
-  //
-  // 🔹 Menús generales
-  //
+
   return (
     <GameProvider>
       <SettingsProvider>

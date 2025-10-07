@@ -30,6 +30,13 @@ interface GameStats {
   efficiency: number;
 }
 
+interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+const IA_APIKEY = import.meta.env.VITE_GROQ_API_KEY;
+
 const createFarmPlotSvg = (growth: number = 0, health: number = 100): string => `
   <svg viewBox="0 0 64 64" fill="none" width="48" height="48">
     <defs>
@@ -227,6 +234,144 @@ const PlotModal: React.FC<{
   );
 };
 
+const Chatbot: React.FC<{
+  center: [number, number];
+  selectedPlot: FarmPlot | null;
+  onClose: () => void;
+}> = ({ center, selectedPlot, onClose }) => {
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Consulta inicial a Groq cuando se monta el componente o cambia la parcela seleccionada
+  useEffect(() => {
+    const fetchInitialResponse = async () => {
+      setIsLoading(true);
+      const lat = selectedPlot?.position.lat || center[0];
+      const lng = selectedPlot?.position.lng || center[1];
+      const prompt = `En Huánuco, Perú (lat: ${lat.toFixed(4)}, lng: ${lng.toFixed(4)}), ¿qué produce mayormente la tierra? ¿Qué vegetales se recomiendan sembrar y cómo cuidarlos? Proporciona una respuesta breve y práctica.`;
+
+      try {
+        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization':  `Bearer ${IA_APIKEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            messages: [{ role: 'user', content: prompt }],
+            model: 'llama-3.1-8b-instant',
+            temperature: 0.7,
+            max_tokens: 150,
+          }),
+        });
+
+        if (!response.ok) throw new Error('Error en la solicitud a Groq');
+        const data = await response.json();
+        const reply = data.choices[0].message.content;
+
+        setMessages([{ role: 'assistant', content: reply }]);
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Error al consultar Groq:', error);
+        setMessages([{ role: 'assistant', content: 'Error al obtener recomendaciones. Intenta de nuevo.' }]);
+        setIsLoading(false);
+      }
+    };
+
+    fetchInitialResponse();
+  }, [center, selectedPlot]);
+
+  // Enviar mensaje del usuario
+  const handleSendMessage = async () => {
+    if (!input.trim() || isLoading) return;
+
+    const userMessage: ChatMessage = { role: 'user', content: input };
+    setMessages(prev => [...prev, userMessage]);
+    setInput('');
+    setIsLoading(true);
+
+    const lat = selectedPlot?.position.lat || center[0];
+    const lng = selectedPlot?.position.lng || center[1];
+    const prompt = `${input} (Contexto: Huánuco, Perú, lat: ${lat.toFixed(4)}, lng: ${lng.toFixed(4)}). Proporciona una respuesta breve y práctica.`;
+
+    try {
+      const response = await fetch('https://api.groq.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${IA_APIKEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages: [{ role: 'user', content: prompt }],
+          model: 'llama-3.1-8b-instant',
+          temperature: 0.7,
+          max_tokens: 150,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Error en la solicitud a Groq');
+      const data = await response.json();
+      const reply = data.choices[0].message.content;
+
+      setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Error al consultar Groq:', error);
+      setMessages(prev => [...prev, { role: 'assistant', content: 'Error al obtener respuesta. Intenta de nuevo.' }]);
+      setIsLoading(false);
+    }
+  };
+
+  // Auto-scroll al final de los mensajes
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  return (
+    <div className="absolute top-4 right-4 w-80 bg-black/90 backdrop-blur-lg rounded-game-lg p-4 z-50 border-2 border-primary/30 animate-fade-in">
+      <div className="flex justify-between items-center mb-3">
+        <h3 className="text-lg font-display text-gradient-primary">🌾 AgroBot</h3>
+        <button onClick={onClose} className="text-muted hover:text-white text-xl transition-colors">
+          ✕
+        </button>
+      </div>
+      <div className="h-64 overflow-y-auto mb-3 bg-card/50 rounded-game p-3 text-sm text-white">
+        {messages.map((msg, index) => (
+          <div key={index} className={`mb-2 ${msg.role === 'user' ? 'text-right' : 'text-left'}`}>
+            <span className={`inline-block p-2 rounded-game ${msg.role === 'user' ? 'bg-primary/20 text-white' : 'bg-gray-700/50 text-gray-200'}`}>
+              {msg.role === 'user' ? 'Tú: ' : 'AgroBot: '}{msg.content}
+            </span>
+          </div>
+        ))}
+        {isLoading && (
+          <div className="text-center text-muted animate-pulse">Cargando...</div>
+        )}
+        <div ref={messagesEndRef} />
+      </div>
+      <div className="flex space-x-2">
+        <input
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+          className="flex-1 bg-card text-white rounded-game p-2 text-sm border border-gray-600 focus:border-primary outline-none"
+          placeholder="Pregunta sobre cultivos..."
+          disabled={isLoading}
+        />
+        <button
+          onClick={handleSendMessage}
+          className="bg-gradient-primary text-white px-4 py-2 rounded-game hover:bg-primary/80 transition-all disabled:opacity-50"
+          disabled={isLoading}
+        >
+          ➤
+        </button>
+      </div>
+    </div>
+  );
+};
+
 const Mapa: React.FC = () => {
   const [modo3D, setModo3D] = useState(false);
   const [selectedPlot, setSelectedPlot] = useState<FarmPlot | null>(null);
@@ -237,7 +382,6 @@ const Mapa: React.FC = () => {
     { name: 'FIRE DETECTION', amount: 30, icon: '🔥', color: 'bg-orange-500', layerKey: 'fire' },
     { name: 'NIGHT VIEW', amount: 20, icon: '🌙', color: 'bg-indigo-500', layerKey: 'night' },
   ]);
-
   const [farmPlots, setFarmPlots] = useState<FarmPlot[]>([]);
   const [isPlacingMode, setIsPlacingMode] = useState(false);
   const [showPlotModal, setShowPlotModal] = useState(false);
@@ -249,6 +393,7 @@ const Mapa: React.FC = () => {
     efficiency: 95
   });
   const [showStats, setShowStats] = useState(false);
+  const [showChatbot, setShowChatbot] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [center, setCenter] = useState<[number, number]>([-9.9306, -76.2422]);
   const [activeLayer, setActiveLayer] = useState<'truecolor' | 'ndvi' | 'thermal' | 'fire' | 'night'>('truecolor');
@@ -519,7 +664,6 @@ const Mapa: React.FC = () => {
               center={center}
               zoom={12}
               className="h-full w-full"
-              whenCreated={() => console.log('MapContainer creado')}
             >
               <TileLayer
                 url={mapStyles[mapStyle]}
@@ -597,6 +741,14 @@ const Mapa: React.FC = () => {
               title="Mission Statistics"
             >
               <span className="text-2xl group-hover:animate-bounce">📊</span>
+            </button>
+
+            <button
+              onClick={() => setShowChatbot(!showChatbot)}
+              className="w-14 h-14 card-game flex items-center justify-center hover:shadow-game-lg transition-all duration-300 hover:scale-110 hover:border-accent-soil/50 group"
+              title="AgroBot Chat"
+            >
+              <span className="text-2xl group-hover:animate-bounce">🤖</span>
             </button>
 
             <button
@@ -686,6 +838,14 @@ const Mapa: React.FC = () => {
                 </div>
               </div>
             </div>
+          )}
+
+          {showChatbot && (
+            <Chatbot
+              center={center}
+              selectedPlot={selectedPlot}
+              onClose={() => setShowChatbot(false)}
+            />
           )}
 
           <PlotModal

@@ -44,6 +44,7 @@ interface VistaTerreno3dProps {
 }
 
 const VistaTerreno3d: React.FC<VistaTerreno3dProps> = ({ selectedPlot }) => {
+  
   const { gameState, startGame, updateScore, selectCrop } = useGame();
   const [sectorSeleccionado, setSectorSeleccionado] = useState<SectorData | null>(null);
   const [panelAbierto, setPanelAbierto] = useState<boolean>(true);

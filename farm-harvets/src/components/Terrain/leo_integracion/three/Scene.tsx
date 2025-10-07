@@ -65,6 +65,23 @@ const Scene: React.FC<SceneProps> = ({ onSectorClick, selectedPlot }) => {
   const [progress, setProgress] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
 
+
+  // --- Highlight y clics ---
+  const highlightSector = (sector: Plot) => {
+    const child = sector.children[0] as THREE.Mesh;
+    const mat = child?.material as THREE.MeshStandardMaterial;
+    if (mat && mat.isMaterial) {
+      mat.emissive.set(0x666666);
+      mat.emissiveIntensity = 0.7;
+      setTimeout(() => {
+        if (mat.isMaterial) {
+          mat.emissive.set(0x000000);
+          mat.emissiveIntensity = 0;
+        }
+      }, 300);
+    }
+  };
+
   useEffect(() => {
     // Limpia canvas previo
     if (mountRef.current) {
@@ -182,38 +199,23 @@ const Scene: React.FC<SceneProps> = ({ onSectorClick, selectedPlot }) => {
 
       // Seleccionar parcela inicial
       const plotId = parseInt(selectedPlot.id.replace('plot-', ''));
-      const plot = terrenoGroup.children.find(
+      const plotMap = terrenoGroup.children.find(
         (child) => (child as Plot).userData.id === plotId
       ) as Plot | undefined;
-      if (plot) {
-        console.log('Parcela encontrada en terreno:', plot);
+      if (plotMap) {
+        console.log('Parcela encontrada en terreno:', plotMap);
         onSectorClick({
           id: plotId,
-          plot,
-          position: selectedPlot.position, // Pasar GPS
+          plot: plotMap,
+          position: selectedPlot.position,
         });
-        highlightSector(plot);
+        highlightSector(plotMap);
       } else {
         console.warn('Parcela no encontrada en terreno:', plotId);
         onSectorClick(null);
       }
     }
 
-    // --- Highlight y clics ---
-    const highlightSector = (sector: Plot) => {
-      const child = sector.children[0] as THREE.Mesh;
-      const mat = child?.material as THREE.MeshStandardMaterial;
-      if (mat && mat.isMaterial) {
-        mat.emissive.set(0x666666);
-        mat.emissiveIntensity = 0.7;
-        setTimeout(() => {
-          if (mat.isMaterial) {
-            mat.emissive.set(0x000000);
-            mat.emissiveIntensity = 0;
-          }
-        }, 300);
-      }
-    };
 
     const handleClick = (event: MouseEvent) => {
       if (!sceneReadyRef.current || hasCriticalError.current) return;
